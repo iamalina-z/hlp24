@@ -261,10 +261,8 @@ module PartX =
         lensMap lensC fc >> lensMap lensB fb
 
     let combineLens (l1: Lens<'A, 'B>) (l2: Lens<'B, 'C>) : Lens<'A, 'C> =
-        let getBfromA = fst l1
-        let putBinA = snd l1
-        let getCfromB = fst l2
-        let putCinB = snd l2
-        let getCfromA = (fun x -> getCfromB (getBfromA x))
+        let getBfromA, putBinA = l1
+        let getCfromB, putCinB = l2
+        let getCfromA = getCfromB << getBfromA 
         let putCinA = (fun c a -> putBinA (putCinB c (getBfromA a)) a)
         getCfromA, putCinA
