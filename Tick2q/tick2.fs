@@ -4,29 +4,26 @@ module Tick2
 
 
 module PartACase1 =
-    type setMscBoundaries = {
-            Distinction: int;
-            Merit: int;
-            Pass: int;
-            Fail: int 
-        }
+    type setMscBoundaries =
+        { Distinction: float
+          Merit: float
+          Pass: float
+          Fail: float }
 
-    type setMEngBoundaries = { 
-            First: int;
-            UpperSecond: int;
-            LowerSecond: int;
-            Fail: int 
-        }
+    type setMEngBoundaries =
+        { First: float
+          UpperSecond: float
+          LowerSecond: float
+          Fail: float }
 
-    type setBEngBoundaries = { 
-            First: int;
-            UpperSecond: int;
-            LowerSecond: int;
-            Third: int;
-            Fail: int 
-        }
+    type setBEngBoundaries =
+        { First: float
+          UpperSecond: float
+          LowerSecond: float
+          Third: float
+          Fail: float }
 
-    let mscBoundaries : setMscBoundaries=
+    let mscBoundaries: setMscBoundaries =
         { Distinction = 70
           Merit = 60
           Pass = 50
@@ -38,13 +35,13 @@ module PartACase1 =
           LowerSecond = 50
           Fail = 0 }
 
-    let bEngBoundaries : setBEngBoundaries =
+    let bEngBoundaries: setBEngBoundaries =
         { First = 70
           UpperSecond = 60
           LowerSecond = 50
           Third = 40
           Fail = 0 }
-    
+
 // Three record types, one data value of each type. Choose suitable names.
 
 module PartACase2 =
@@ -81,15 +78,9 @@ module PartACase2 =
 module PartACase3 =
     let mscBoundaries = [ "Distinction", 70.0; "Merit", 60.0; "Pass", 50.0; "Fail", 0 ]
 
-    let mEngBoundaries =
-        [ "First", 70.0; "UpperSecond", 60.0; "LowerSecond", 50.0; "Fail", 0 ]
+    let mEngBoundaries = [ "First", 70.0; "UpperSecond", 60.0; "LowerSecond", 50.0; "Fail", 0 ]
 
-    let bEngBoundaries =
-        [ "First", 70.0
-          "UpperSecond", 60.0
-          "LowerSecond", 50.0
-          "Third", 40
-          "Fail", 0 ]
+    let bEngBoundaries = [ "First", 70.0; "UpperSecond", 60.0; "LowerSecond", 50.0; "Third", 40; "Fail", 0 ]
 // One type, three data values of this type. Choose suitable names.
 
 //---------------------------Tick2 PartB case 2 skeleton code-------------------------------//
@@ -103,25 +94,23 @@ module PartBCase2 =
     /// Return Error if course or mark are not possible (marks must be in range 100 - 0).
     /// The error message should say what the problem in the data was.
     let classify (course: string) (mark: float) : Result<string, string> =
-        let getBounds boundary =
+        let getClass boundary =
+            let handleNone optClass =
+                match optClass with
+                | Some value -> Ok value
+                | None -> Ok "Fail"
             match mark with
-            | mark when mark > 100 -> Error "impossible mark, must be in range 100 - 0"
-            | mark when mark < 0 -> Error "impossible mark, must be in range 100 - 0"
-            | mark when mark >= 70 -> Ok boundary.Bound70
-            | mark when mark >= 60 -> Ok boundary.Bound60
-            | mark when mark >= 50 -> Ok boundary.Bound50
-            | mark when mark >= 40 -> Ok boundary.Bound40
-            | _ -> Ok boundary.Bound0
-
-        let handleNone optClass =
-            optClass
-            |> Option.map (fun s -> Ok s)
-            |> Option.defaultValue (Ok "Fail")
+            | mark when mark > 100 || mark < 0 -> Error "impossible mark, must be in range 100 - 0"
+            | mark when mark >= 70 -> handleNone boundary.Bound70
+            | mark when mark >= 60 -> handleNone boundary.Bound60
+            | mark when mark >= 50 -> handleNone boundary.Bound50
+            | mark when mark >= 40 -> handleNone boundary.Bound40
+            | _ -> handleNone boundary.Bound0
 
         match course with
-        | "MSc" -> getBounds mscBoundaries |> Result.bind handleNone
-        | "MEng" -> getBounds mEngBoundaries |> Result.bind handleNone
-        | "BEng" -> getBounds bEngBoundaries |> Result.bind handleNone
+        | "MSc" -> getClass mscBoundaries 
+        | "MEng" -> getClass mEngBoundaries 
+        | "BEng" -> getClass bEngBoundaries 
         | _ -> Error "Error: Invalid course name"
 
 //---------------------------Tick2 PartB case 3 skeleton code-------------------------------//
@@ -133,18 +122,18 @@ module PartBCase3 =
     /// Return as a Ok string the name of the correct classification for a studen on given course with given mark.
     /// Return Error if course or mark are not possible (marks must be in range 100 - 0). The error message should say what the problem in the data was.
     let classify (course: string) (mark: float) : Result<string, string> =
-        let getBounds boundary =
+        let getClass boundary =
             if mark > 100.0 || mark < 0 then
                 Error "impossible mark, must be in range 100 - 0"
             else
                 match List.tryFind (fun (_, bound) -> mark >= bound) boundary with
-                | Some label -> Ok(fst label)
+                | Some label -> Ok (fst label)
                 | None -> Error "impossible mark, must be in range 100 - 0"
 
         match course with
-        | "MSc" -> getBounds mscBoundaries
-        | "MEng" -> getBounds mEngBoundaries
-        | "BEng" -> getBounds bEngBoundaries
+        | "MSc" -> getClass mscBoundaries
+        | "MEng" -> getClass mEngBoundaries
+        | "BEng" -> getClass bEngBoundaries
         | _ -> Error "Error: Invalid course name"
 
 //------------------------------------Tick2 PartC skeleton code-----------------------------------//
@@ -199,26 +188,22 @@ module PartC =
         // Return Ok classname or an error if there is any error.
         // (option and error returns ignored in above comments, must be dealt with)
 
-        //Use match and/or the Option and Result module functions (e.g. Option.defaultValue, Option.map) 
-        //to process the cases where the constituent functions return an Error or None value. 
-        //There is a lot of choice in how you do this - try to code the necessary logic as simply as possible. 
-        //Make sure you write code that can never fail (for example - Option.get can fail if its option input is None).
-        //Use list functions e.g. tryFind or tryPick or forall or exists to determine which boundary, 
-        //if any, the total lies within uplift range of, and to determine whether anything goes wrong.
-        let total = Option.defaultValue 200.0 (markTotal marks course)
-        
-        let boundaryName =
-            match List.tryFind (fun name -> classify course total = Ok name) boundaries with
-            | Some name -> name
-            | None -> "Boundary not found" 
-        let upliftResult = upliftFunc marks boundaryName course
-        match upliftResult with
-        | Ok record -> match record.Uplift with
-                        | Some value -> classify course (total + value)
-                        | None -> Ok boundaryName
-        | Error errMsg -> Error errMsg
+        match markTotal marks course with
+        | Some totalMark ->
+            let boundaryName =
+                match List.tryFind (fun name -> classify course totalMark = Ok name) boundaries with
+                | Some name -> name
+                | None -> "Boundary not found"
 
-        
+            match upliftFunc marks boundaryName course with
+            | Ok result ->
+                match result.Uplift with
+                | Some value -> classify course (totalMark + value)
+                | None -> Ok boundaryName
+            | Error errMsg -> Error errMsg
+        | None -> Error "Invalid course or mark"
+
+
 
 //------------------------------Simple test data and functions---------------------------------//
 module TestClassify =
@@ -236,7 +221,8 @@ module TestClassify =
           "MEng", 45.0, Ok "Fail"
           "MSc", 45.0, Ok "Fail"
           "BEng", 45.0, Ok "Third"
-          "BEng", 35.0, Ok "Fail" ]
+          "BEng", 35.0, Ok "Fail" 
+        ]
 
     let runClassifyTests unitTests classify testName =
         unitTests
@@ -274,11 +260,11 @@ module PartX =
     let mapCAndB (lensC: Lens<'A, 'C>) (lensB: Lens<'A, 'B>) (fc: 'C -> 'C) (fb: 'B -> 'B) =
         lensMap lensC fc >> lensMap lensB fb
 
-    let combineLens (l1: Lens<'A, 'B>) (l2: Lens<'B, 'C>) : Lens<'A, 'C> = 
+    let combineLens (l1: Lens<'A, 'B>) (l2: Lens<'B, 'C>) : Lens<'A, 'C> =
         let getBfromA = fst l1
         let putBinA = snd l1
         let getCfromB = fst l2
         let putCinB = snd l2
         let getCfromA = (fun x -> getCfromB (getBfromA x))
-        let putCinA = (fun c a ->  putBinA (putCinB c (getBfromA a)) a)
+        let putCinA = (fun c a -> putBinA (putCinB c (getBfromA a)) a)
         getCfromA, putCinA
